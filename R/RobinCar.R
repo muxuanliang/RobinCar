@@ -21,7 +21,8 @@
 #' }
 #' @references Ting Ye, Yanyao Yi, Jun Shao (2020). Inference on Average Treatment Effect under Minimization and Other Covariate-Adaptive Randomization Methods.
 #'
-#' @import stats tidyverse
+#' @import stats
+#' @import tidyverse
 #' @export
 #'
 RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,

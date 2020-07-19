@@ -26,7 +26,8 @@
 #' @export
 #'
 RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
-                    Fun.covariates = NA, Fun.adjmethod="Hetero"){
+                   Fun.covariates = NA, Fun.adjmethod="Hetero"){
+
   # print("For now only two sided pval is provided, one sided pval can be calculated from results!")
   if(! is.data.frame(Fun.data)){
     stop(print("Fun.data should be a data frame!"))
@@ -69,12 +70,12 @@ RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
   Fun.n <- nrow(Fun.data)
 
   if(all(is.na(Fun.trt_alc.pair))){
-    Fun.trt_pie <- Fun.data %>% group_by(I) %>% summarise(pieI=n()/Fun.n) %>%
-      filter(I %in% Fun.trt_label.pair) %>% arrange(match(Fun.trt_label.pair, I))
+    Fun.trt_pie <- Fun.data %>% group_by(I) %>% summarise(pieI=n()/Fun.n) %>% filter(I %in% Fun.trt_label.pair)
+    Fun.trt_pie <- Fun.trt_pie[match(Fun.trt_label.pair, Fun.trt_pie$I),]
   }else{
-    Fun.trt_pie <- Fun.data %>% distinct(I) %>%
-      filter(I %in% Fun.trt_label.pair) %>% arrange(match(Fun.trt_label.pair, I)) %>%
-      bind_cols(pieI = Fun.trt_alc.pair)
+    Fun.trt_pie <- Fun.data %>% distinct(I) %>% filter(I %in% Fun.trt_label.pair)
+    Fun.trt_pie <- Fun.trt_pie[match(Fun.trt_label.pair, Fun.trt_pie$I),]
+    Fun.trt_pie <- cbind.data.frame(I=Fun.trt_pie, pieI = Fun.trt_alc.pair)
   }
 
   Fun.estimate <- 0
@@ -92,9 +93,9 @@ RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
       Fun.sumstat.z <- Fun.data.z %>%
         group_by(I) %>%
         summarise(ybar = mean(y), yvar = var(y)) %>%
-        filter(I %in% Fun.trt_label.pair) %>%
-        arrange(match(Fun.trt_label.pair, I)) %>%
-        left_join(y=Fun.trt_pie, by = "I")
+        filter(I %in% Fun.trt_label.pair)
+      Fun.sumstat.z <- Fun.sumstat.z[match(Fun.trt_label.pair, Fun.sumstat.z$I), ]
+      Fun.sumstat.z <- Fun.sumstat.z %>% left_join(y=Fun.trt_pie, by = "I")
       Fun.estimate <- Fun.estimate + (Fun.nz/Fun.n)*(Fun.sumstat.z$ybar[2]-Fun.sumstat.z$ybar[1])
       Fun.sigmaU_sq <- Fun.sigmaU_sq + (Fun.nz/Fun.n)*sum(Fun.sumstat.z$yvar/Fun.sumstat.z$pieI)
       Fun.sigmaV_sq <- Fun.sigmaV_sq + (Fun.nz/Fun.n)*(Fun.sumstat.z$ybar[2]-Fun.sumstat.z$ybar[1])^2
@@ -134,8 +135,8 @@ RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
       Fun.data.z <- Fun.data[Fun.data$strata_cross==Fun.j, ]
       Fun.nz <- nrow(Fun.data.z)
       Fun.data.z.model <- Fun.data.z %>%
-        mutate(I_st = factor(I)) %>%
-        select(y, I_st, Fun.covariates)
+        mutate(I_st = factor(I))
+      Fun.data.z.model <- Fun.data.z.model[ , c("y", "I_st", Fun.covariates)]
       Fun.model.z.lm <- lm(y~0+., data = Fun.data.z.model)
       Fun.thetahat.Bz <- diff(Fun.model.z.lm$coefficients[match(Fun.trt_label.pair, levels(Fun.data.z.model$I_st))])
       Fun.estimate <- Fun.estimate + (Fun.nz/Fun.n)*Fun.thetahat.Bz

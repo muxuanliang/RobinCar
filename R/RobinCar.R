@@ -23,7 +23,7 @@
 #'
 #' @author Ting Ye Yanyao Yi
 #' @importFrom stringr str_detect
-#' @importFrom dplyr %>% group_by summarise filter left_join mutate_at select distinct
+#' @importFrom dplyr %>% group_by summarise filter left_join mutate mutate_at select distinct
 #' @export
 #'
 #' @examples

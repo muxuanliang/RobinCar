@@ -25,7 +25,7 @@
 #' @import tidyverse
 #' @export
 #'
-RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
+RobinCar<-function(Fun.data = data_sim, Fun.trt_label.pair = c(0,1), Fun.trt_alc.pair = NA,
                    Fun.covariates = NA, Fun.adjmethod="Hetero"){
 
   # print("For now only two sided pval is provided, one sided pval can be calculated from results!")
@@ -70,11 +70,13 @@ RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
   Fun.n <- nrow(Fun.data)
 
   if(all(is.na(Fun.trt_alc.pair))){
-    Fun.trt_pie <- Fun.data %>% group_by(I) %>% summarise(pieI=n()/Fun.n) %>% filter(I %in% Fun.trt_label.pair)
+    Fun.trt_pie <- Fun.data %>% group_by(I) %>% summarise(pieI=n()/Fun.n)
+    Fun.trt_pie <- Fun.trt_pie[Fun.trt_pie$I %in% Fun.trt_label.pair,]
     Fun.trt_pie <- Fun.trt_pie[match(Fun.trt_label.pair, Fun.trt_pie$I),]
   }else{
-    Fun.trt_pie <- Fun.data %>% distinct(I) %>% filter(I %in% Fun.trt_label.pair)
-    Fun.trt_pie <- Fun.trt_pie[match(Fun.trt_label.pair, Fun.trt_pie$I),]
+    Fun.trt_pie <- Fun.data %>% distinct(I)
+    Fun.trt_pie <- Fun.trt_pie[Fun.trt_pie$I %in% Fun.trt_label.pair, ]
+    Fun.trt_pie <- Fun.trt_pie[match(Fun.trt_label.pair, Fun.trt_pie)]
     Fun.trt_pie <- cbind.data.frame(I=Fun.trt_pie, pieI = Fun.trt_alc.pair)
   }
 
@@ -92,8 +94,8 @@ RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
       Fun.nz <- nrow(Fun.data.z)
       Fun.sumstat.z <- Fun.data.z %>%
         group_by(I) %>%
-        summarise(ybar = mean(y), yvar = var(y)) %>%
-        filter(I %in% Fun.trt_label.pair)
+        summarise(ybar = mean(y), yvar = var(y))
+      Fun.sumstat.z <- Fun.sumstat.z[Fun.sumstat.z$I %in% Fun.trt_label.pair, ]
       Fun.sumstat.z <- Fun.sumstat.z[match(Fun.trt_label.pair, Fun.sumstat.z$I), ]
       Fun.sumstat.z <- Fun.sumstat.z %>% left_join(y=Fun.trt_pie, by = "I")
       Fun.estimate <- Fun.estimate + (Fun.nz/Fun.n)*(Fun.sumstat.z$ybar[2]-Fun.sumstat.z$ybar[1])
@@ -109,8 +111,9 @@ RobinCar<-function(Fun.data, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
       Fun.nz <- nrow(Fun.data.z)
       Fun.data.z.model <- Fun.data.z %>%
         mutate_at(Fun.covariates, list(centered = ~ scale(., scale = F))) %>%
-        select(y, I, contains("centered")) %>%
-        filter(I %in% Fun.trt_label.pair) %>%
+        select(y, I, contains("centered"))
+      Fun.data.z.model <- Fun.data.z.model[Fun.data.z.model$I %in% Fun.trt_label.pair, ]
+      Fun.data.z.model <- Fun.data.z.model %>%
         mutate(I_st = as.numeric(factor(I, levels = Fun.trt_label.pair))-1) %>%
         mutate_at(vars(contains("centered")), list(beta1 = ~. * I_st, beta0 = ~. * (1-I_st))) %>%
         select(y, I_st, contains("beta"))

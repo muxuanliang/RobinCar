@@ -9,7 +9,7 @@
 #' If Fun.trt_alc.pair is NA, pi_s and pi_t will be estimated from Fun.data$I.
 #' @param Fun.covariates A subset of c('x1', ..., 'xp'), which indicates the covariates used for adjustment and should match the column names in Fun.data.
 #' The default is NA, that is no covariate adjustment is made and theta_hat will be applied.
-#' @param Fun.adjustment Either "Hetero" or "Homo". "Hetero" corresponds to theta_A_hat; "Homo" corresponds to theta_B_hat.
+#' @param Fun.adjmethod Either "Hetero" or "Homo". "Hetero" corresponds to theta_A_hat; "Homo" corresponds to theta_B_hat.
 #' If Fun.covariates is NA, this argument will be omitted. For recommendations of using either "Hetero" or "Homo", please refer to the last section of Ye et al., (2020).
 #'
 #' @return A list
@@ -21,9 +21,17 @@
 #' }
 #' @references Ting Ye, Yanyao Yi, Jun Shao (2020). Inference on Average Treatment Effect under Minimization and Other Covariate-Adaptive Randomization Methods.
 #'
-#' @import stats
-#' @import dplyr
+#' @author Ting Ye Yanyao Yi
+#' @importFrom stringr str_detect
+#' @importFrom dplyr %>% group_by summarise filter left_join mutate_at select distinct
 #' @export
+#'
+#' @examples
+#'
+#' RobinCar(Fun.data = RobinCar:::data_sim, Fun.trt_label.pair = c(1,3), Fun.trt_alc.pair = c(1/5, 2/5), Fun.covariates = NA, Fun.adjmethod = NA)
+#' RobinCar(Fun.data = RobinCar:::data_sim, Fun.trt_label.pair = c(1,3), Fun.trt_alc.pair = c(1/5, 2/5), Fun.covariates = "x3", Fun.adjmethod = "Hetero")
+#' RobinCar(Fun.data = RobinCar:::data_sim, Fun.trt_label.pair = c(1,3), Fun.trt_alc.pair = c(1/5, 2/5), Fun.covariates = "x3", Fun.adjmethod = "Homo")
+#'
 #'
 RobinCar<-function(Fun.data = data_sim, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
                    Fun.covariates = NA, Fun.adjmethod="Hetero"){
@@ -119,8 +127,8 @@ RobinCar<-function(Fun.data = data_sim, Fun.trt_label.pair, Fun.trt_alc.pair = N
         select(y, I_st, contains("beta"))
       Fun.model.z.lm <- lm(y~., data = Fun.data.z.model)
       Fun.estimate <- Fun.estimate + (Fun.nz/Fun.n)*Fun.model.z.lm$coefficients[2]
-      Fun.beta1 <- Fun.model.z.lm$coefficients[str_detect(names(Fun.model.z.lm$coefficients), "beta1")]
-      Fun.beta0 <- Fun.model.z.lm$coefficients[str_detect(names(Fun.model.z.lm$coefficients), "beta0")]
+      Fun.beta1 <- Fun.model.z.lm$coefficients[stringr::str_detect(names(Fun.model.z.lm$coefficients), "beta1")]
+      Fun.beta0 <- Fun.model.z.lm$coefficients[stringr::str_detect(names(Fun.model.z.lm$coefficients), "beta0")]
       Fun.sigmaA_sq_2 <- (Fun.beta1-Fun.beta0)%*%var(Fun.data.z[, Fun.covariates])%*%(Fun.beta1-Fun.beta0)
       Fun.sigmaA_sq_1 <- sum(c(var(Fun.data.z$y[Fun.data.z$I==Fun.trt_label.pair[1]]
                                      - rowSums(sweep(as.matrix(Fun.data.z[Fun.data.z$I==Fun.trt_label.pair[1], Fun.covariates]), MARGIN = 2, Fun.beta0, "*"))),

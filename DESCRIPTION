@@ -1,11 +1,11 @@
 Package: RobinCar
 Type: Package
-Title: Robust Inference/Testing of Treatment Effects under Covariate-adaptive Randomization
+Title: Robust Inference/Testing of Treatment Effects under Covariate-Adaptive Randomization
 Version: 0.1.0
 Author: Ting Ye, Yanyao Yi
 Maintainer: Ting Ye <tingye@wharton.upenn.edu>
 Description: Robust inference/testing of treatment effects under covariate-adaptive randomization. The package implements three estimators, that are model-free and generally applicable under many covariate-adaptive randomization methods, including the minimization, stratified permuted block, stratified biased coin, and stratified urn design; see Ye et al. (2020).
-License: What license is it under?
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1

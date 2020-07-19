@@ -22,7 +22,7 @@ If Fun.trt_alc.pair is NA, pi_s and pi_t will be estimated from Fun.data$I.}
 \item{Fun.covariates}{A subset of c('x1', ..., 'xp'), which indicates the covariates used for adjustment and should match the column names in Fun.data.
 The default is NA, that is no covariate adjustment is made and theta_hat will be applied.}
 
-\item{Fun.adjustment}{Either "Hetero" or "Homo". "Hetero" corresponds to theta_A_hat; "Homo" corresponds to theta_B_hat.
+\item{Fun.adjmethod}{Either "Hetero" or "Homo". "Hetero" corresponds to theta_A_hat; "Homo" corresponds to theta_B_hat.
 If Fun.covariates is NA, this argument will be omitted. For recommendations of using either "Hetero" or "Homo", please refer to the last section of Ye et al., (2020).}
 }
 \value{
@@ -37,6 +37,17 @@ A list
 \description{
 Main function for RobinCar
 }
+\examples{
+
+RobinCar(Fun.data = RobinCar:::data_sim, Fun.trt_label.pair = c(1,3), Fun.trt_alc.pair = c(1/5, 2/5), Fun.covariates = NA, Fun.adjmethod = NA)
+RobinCar(Fun.data = RobinCar:::data_sim, Fun.trt_label.pair = c(1,3), Fun.trt_alc.pair = c(1/5, 2/5), Fun.covariates = "x3", Fun.adjmethod = "Hetero")
+RobinCar(Fun.data = RobinCar:::data_sim, Fun.trt_label.pair = c(1,3), Fun.trt_alc.pair = c(1/5, 2/5), Fun.covariates = "x3", Fun.adjmethod = "Homo")
+
+
+}
 \references{
 Ting Ye, Yanyao Yi, Jun Shao (2020). Inference on Average Treatment Effect under Minimization and Other Covariate-Adaptive Randomization Methods.
+}
+\author{
+Ting Ye Yanyao Yi
 }

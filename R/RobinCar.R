@@ -22,10 +22,10 @@
 #' @references Ting Ye, Yanyao Yi, Jun Shao (2020). Inference on Average Treatment Effect under Minimization and Other Covariate-Adaptive Randomization Methods.
 #'
 #' @import stats
-#' @import tidyverse
+#' @import dplyr
 #' @export
 #'
-RobinCar<-function(Fun.data = data_sim, Fun.trt_label.pair = c(0,1), Fun.trt_alc.pair = NA,
+RobinCar<-function(Fun.data = data_sim, Fun.trt_label.pair, Fun.trt_alc.pair = NA,
                    Fun.covariates = NA, Fun.adjmethod="Hetero"){
 
   # print("For now only two sided pval is provided, one sided pval can be calculated from results!")
